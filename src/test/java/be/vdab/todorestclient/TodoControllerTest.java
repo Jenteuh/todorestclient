@@ -10,8 +10,10 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withResourceNotFound;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @RestClientTest(components = {TodoController.class, TodoClient.class , Configuratie.class})
@@ -40,5 +42,14 @@ class TodoControllerTest {
 
         List<TodoResponse> todos = todoController.findTodos(1);
         assertEquals("test2", todos.getFirst().tekst());
+    }
+
+    @Test
+    void findTodosMetOnbestaandeMensIdGeeftNotFound() {
+
+        mockServer.expect(requestTo("http://localhost:8080/mensen/1000000/todos"))
+                .andRespond(withResourceNotFound());
+
+        assertThatExceptionOfType(MensNietGevondenException.class);
     }
 }

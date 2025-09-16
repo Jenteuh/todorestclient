@@ -1,6 +1,7 @@
 package be.vdab.todorestclient;
 
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -15,8 +16,13 @@ class TodoClient {
     }
 
     List<TodoResponse> findAllByMensId(long id) {
-        return Arrays.stream(requests.findAllByMensId(id))
-                .sorted(Comparator.comparing(TodoResponse::prioriteit,
-                        Comparator.reverseOrder())).toList();
+
+        try {
+            return Arrays.stream(requests.findAllByMensId(id))
+                    .sorted(Comparator.comparing(TodoResponse::prioriteit,
+                            Comparator.reverseOrder())).toList();
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new MensNietGevondenException();
+        }
     }
 }
